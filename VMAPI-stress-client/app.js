@@ -40,6 +40,10 @@ var executeCommand = command => {
     });
 };
 
+router.get('/', (req, res) => {
+    res.send({ res: 'I am here' });
+})
+
 router.post('/execute-test', (req, res) => {
     var body = req.body;
     var command = EXECUTE_TEST_COMMAND;
