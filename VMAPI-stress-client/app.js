@@ -20,8 +20,8 @@ var port = process.env.PORT || 8080;
 
 var router = express.Router();
 
-var EXECUTE_TEST_COMMAND = 'cd ${body.testProjectPath} && dir && ${body.gradlewPath} gatling-${body.testPath}';
-var UPDATE_REPOSITORY_COMMAND = 'cd ${body.testProjectPath} && git checkout -- . && git pull origin master'
+var EXECUTE_TEST_COMMAND = 'cd ${body.testProjectPath} && ls && ${body.gradlewPath} gatling-${body.testPath}';
+var UPDATE_REPOSITORY_COMMAND = 'cd ${body.testProjectPath} && git checkout -- . && git pull origin master';
 
 var executeCommand = command => {
     return new Promise((resolve, reject) => {
@@ -67,6 +67,10 @@ router.put('/update-code', (req, res) => {
     executeCommand(command)
         .then(() => {
             res.send({ res: command });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send(err);
         });
 
 });
