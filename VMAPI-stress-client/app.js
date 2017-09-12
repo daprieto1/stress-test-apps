@@ -20,7 +20,7 @@ var port = process.env.PORT || 8080;
 
 var router = express.Router();
 
-var EXECUTE_TEST_COMMAND = 'cd ${body.testProjectPath} && ls && ${body.gradlewPath} gatling-${body.testPath}';
+var EXECUTE_TEST_COMMAND = 'cd ${body.testProjectPath} && ${body.gradlewPath} gatling-${body.testPath}';
 var UPDATE_REPOSITORY_COMMAND = 'cd ${body.testProjectPath} && git checkout -- . && git pull origin master';
 
 var executeCommand = command => {
@@ -29,10 +29,8 @@ var executeCommand = command => {
         childProcess.exec(command,
             (err, stdout, stderr) => {
                 if (err) {
-                    console.log('err: ' + err);
                     reject(err);
                 } else {
-                    console.log('stdout: ' + stdout);
                     resolve(stdout);
                 }
             }
@@ -54,8 +52,19 @@ router.post('/execute-test', (req, res) => {
 
     command = eval('`' + command + '`');
     executeCommand(command)
-        .then(() => {
+        .then(gatlingOutput => {
+            gatlingOutput = gatlingOutput.split('\n');
+            gatlingOutput = gatlingOutput[gatlingOutput.length - 6].split(' ');
+            gatlingOutput = gatlingOutput[gatlingOutput.length - 1].split('\\');
+            gatlingOutput.pop();
+            gatlingOutput = gatlingOutput.join('/');
+
+            console.log("=============>" + gatlingOutput);
             res.send({ res: command });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send(err);
         });
 });
 
