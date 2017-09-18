@@ -3,7 +3,11 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     childProcess = require('child_process'),
     morgan = require('morgan'),
-    Promise = require('promise');
+    Promise = require('promise'),
+    fs = require('fs')
+config = /^win/.test(process.platform) ? require('./winConfig.js') : require('./ubuntuConfig.js');
+
+console.log(config);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -20,8 +24,8 @@ var port = process.env.PORT || 8080;
 
 var router = express.Router();
 
-var EXECUTE_TEST_COMMAND = 'cd ${body.testProjectPath} && ${body.gradlewPath} gatling-${body.testPath}';
-var UPDATE_REPOSITORY_COMMAND = 'cd ${body.testProjectPath} && git checkout -- . && git pull origin master';
+var EXECUTE_TEST_COMMAND = config.executeTestCommand;
+var UPDATE_REPOSITORY_COMMAND = config.updateRepositoryCommand;
 
 var executeCommand = command => {
     return new Promise((resolve, reject) => {
@@ -55,11 +59,16 @@ router.post('/execute-test', (req, res) => {
         .then(gatlingOutput => {
             gatlingOutput = gatlingOutput.split('\n');
             gatlingOutput = gatlingOutput[gatlingOutput.length - 6].split(' ');
-            gatlingOutput = gatlingOutput[gatlingOutput.length - 1].split('\\');
+            gatlingOutput = gatlingOutput[gatlingOutput.length - 1].split(config.folderSeparatorCharacter);
             gatlingOutput.pop();
             gatlingOutput = gatlingOutput.join('/');
 
             console.log("=============>" + gatlingOutput);
+
+            fs.copy(gatlingOutput, 'C:\\Users\\DiegoPT\\Downloads')
+                .then(() => console.log('success!'))
+                .catch(err => console.error(err))
+
             res.send({ res: command });
         })
         .catch(err => {
@@ -88,3 +97,4 @@ app.use('/api', router);
 
 app.listen(port);
 console.log('Magic happens on port ' + port);
+
