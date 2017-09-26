@@ -4,8 +4,10 @@ var express = require('express'),
     childProcess = require('child_process'),
     morgan = require('morgan'),
     Promise = require('promise'),
-    fs = require('fs')
-config = /^win/.test(process.platform) ? require('./winConfig.js') : require('./ubuntuConfig.js');
+    fs = require('fs-extra'),
+    config = /^win/.test(process.platform) ? require('./winConfig.js') : require('./ubuntuConfig.js');
+
+const { spawn } = require('child_process');
 
 console.log(config);
 
@@ -61,15 +63,18 @@ router.post('/execute-test', (req, res) => {
             gatlingOutput = gatlingOutput[gatlingOutput.length - 6].split(' ');
             gatlingOutput = gatlingOutput[gatlingOutput.length - 1].split(config.folderSeparatorCharacter);
             gatlingOutput.pop();
-            gatlingOutput = gatlingOutput.join('/');
 
-            console.log("=============>" + gatlingOutput);
+            var reportFolderIn = gatlingOutput.join('/');
+            var reportFolderOut = config.reportFolder + gatlingOutput[gatlingOutput.length - 1];
 
-            fs.copy(gatlingOutput, 'C:\\Users\\DiegoPT\\Downloads')
+            console.log('reportFolderIn: ' + reportFolderIn);
+            console.log('reportFolderOut: ' + reportFolderOut);
+
+            fs.copy(reportFolderIn, reportFolderOut)
                 .then(() => console.log('success!'))
                 .catch(err => console.error(err))
 
-            res.send({ res: command });
+            res.send({ command: command, report: reportFolderOut });
         })
         .catch(err => {
             console.log(err);

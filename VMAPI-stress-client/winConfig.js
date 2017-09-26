@@ -1,5 +1,6 @@
 module.exports = {
-    "executeTestCommand": "cd ${body.testProjectPath} && gradle.bat gatling-${body.testPath}",
-    "updateRepositoryCommand": "cd ${body.testProjectPath} && git checkout -- . && git pull origin master",
-    "folderSeparatorCharacter": "\\"
+    executeTestCommand: "cd ${body.testProjectPath} && gradlew gatling-${body.testPath}",
+    updateRepositoryCommand: "cd ${body.testProjectPath} && git checkout -- . && git pull origin master",
+    folderSeparatorCharacter: "\\",
+    reportFolder:'C:\\Users\\DiegoPT\\Downloads\\'
 };
